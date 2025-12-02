@@ -17,16 +17,16 @@ AppSupportURL={#AppURL}
 DefaultDirName={pf}\Geidea\PhishingReporter
 DefaultGroupName=Phishing Reporter
 AllowNoIcons=yes
-LicenseFile=..\LICENSE
+;LicenseFile=..\LICENSE
 OutputDir=Release
 OutputBaseFilename=PhishingReporter-Setup
 Compression=zip
 SolidCompression=yes
 PrivilegesRequired=admin
 ArchitecturesInstallIn64BitMode=x64
-SetupIconFile=..\phishing.ico
-WizardImageFile=..\splash.jpg
-WizardSmallImageFile=..\phishing.png
+;SetupIconFile=..\phishing.ico
+;WizardImageFile=..\splash.jpg
+;WizardSmallImageFile=..\phishing.png
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
