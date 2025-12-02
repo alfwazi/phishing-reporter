@@ -115,9 +115,18 @@ jobs:
               # Try Inno Setup (is.exe)
               if (Test-Path "is.exe") {
                 Write-Host "Using Inno Setup compiler..."
-                & .\is.exe "Installer\PhishingReporter.iss"
-                if (Test-Path "Installer\Release\PhishingReporter-Setup.exe") {
-                  Write-Host "✅ Inno Setup installer created"
+                & .\is.exe /cc "Installer\PhishingReporter.iss"
+                # Check both possible output locations
+                if (Test-Path "Installer\Output\PhishingReporter-Setup.exe") {
+                  Write-Host "✅ Inno Setup installer created: Installer\Output\PhishingReporter-Setup.exe"
+                  Get-Item "Installer\Output\PhishingReporter-Setup.exe" | Select-Object Name, Length
+                } elseif (Test-Path "Installer\Release\PhishingReporter-Setup.exe") {
+                  Write-Host "✅ Inno Setup installer created: Installer\Release\PhishingReporter-Setup.exe"
+                  Get-Item "Installer\Release\PhishingReporter-Setup.exe" | Select-Object Name, Length
+                } else {
+                  Write-Host "⚠️  Inno Setup completed but installer not found in expected locations"
+                  Write-Host "   Checking Installer directory..."
+                  Get-ChildItem "Installer\" -Recurse -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object FullName
                 }
               } else {
                 Write-Host "Creating PowerShell-based installer..."
