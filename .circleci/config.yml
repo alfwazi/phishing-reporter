@@ -115,18 +115,35 @@ jobs:
               # Try Inno Setup (is.exe)
               if (Test-Path "is.exe") {
                 Write-Host "Using Inno Setup compiler..."
-                & .\is.exe /cc "Installer\PhishingReporter.iss"
-                # Check both possible output locations
-                if (Test-Path "Installer\Output\PhishingReporter-Setup.exe") {
-                  Write-Host "✅ Inno Setup installer created: Installer\Output\PhishingReporter-Setup.exe"
-                  Get-Item "Installer\Output\PhishingReporter-Setup.exe" | Select-Object Name, Length
-                } elseif (Test-Path "Installer\Release\PhishingReporter-Setup.exe") {
-                  Write-Host "✅ Inno Setup installer created: Installer\Release\PhishingReporter-Setup.exe"
-                  Get-Item "Installer\Release\PhishingReporter-Setup.exe" | Select-Object Name, Length
-                } else {
+                Write-Host "Running: .\is.exe /cc Installer\PhishingReporter.iss"
+                $process = Start-Process -FilePath ".\is.exe" -ArgumentList "/cc", "Installer\PhishingReporter.iss" -Wait -PassThru -NoNewWindow
+                Write-Host "Inno Setup exit code: $($process.ExitCode)"
+                
+                # Check all possible output locations
+                $installerPaths = @(
+                  "Installer\Output\PhishingReporter-Setup.exe",
+                  "Installer\Release\PhishingReporter-Setup.exe",
+                  "Installer\PhishingReporter-Setup.exe",
+                  "Installer\Output\*.exe",
+                  "Installer\Release\*.exe"
+                )
+                
+                $found = $false
+                foreach ($path in $installerPaths) {
+                  $files = Get-ChildItem $path -ErrorAction SilentlyContinue
+                  if ($files) {
+                    Write-Host "✅ Inno Setup installer found: $($files.FullName)"
+                    $files | Select-Object Name, Length, FullName
+                    $found = $true
+                    break
+                  }
+                }
+                
+                if (-not $found) {
                   Write-Host "⚠️  Inno Setup completed but installer not found in expected locations"
-                  Write-Host "   Checking Installer directory..."
-                  Get-ChildItem "Installer\" -Recurse -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object FullName
+                  Write-Host "   Checking all files in Installer directory..."
+                  Get-ChildItem "Installer\" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName, Length
+                  Write-Host "   Note: Installer creation may have failed. SCCM package will still be created."
                 }
               } else {
                 Write-Host "Creating PowerShell-based installer..."
