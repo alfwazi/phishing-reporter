@@ -263,9 +263,12 @@
   <PropertyGroup>
     <ApplicationIcon>phishing.ico</ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup>
+  <PropertyGroup Condition="Exists('$(ProjectDir)PhishingReporter_TemporaryKey.pfx')">
     <ManifestKeyFile>PhishingReporter_TemporaryKey.pfx</ManifestKeyFile>
-    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup Condition="!Exists('$(ProjectDir)PhishingReporter_TemporaryKey.pfx')">
+    <!-- If certificate doesn't exist, create a temporary one for signing -->
+    <ManifestKeyFile />
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>DB814D3C81D043DA3F72248E950C99D3F8FB56FE</ManifestCertificateThumbprint>
