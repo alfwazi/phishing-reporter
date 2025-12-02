@@ -103,12 +103,22 @@ jobs:
                 }
               }
             } else {
-              Write-Host "⚠️  WiX not found. Creating PowerShell-based installer..."
-              # Use PowerShell script to create installer
-              if (Test-Path "Installer\create_installer.ps1") {
-                & powershell -ExecutionPolicy Bypass -File "Installer\create_installer.ps1" -OutputPath "Installer\PhishingReporter-Setup.exe"
-                if (Test-Path "Installer\PhishingReporter-Setup.exe") {
-                  Write-Host "✅ Standalone installer created"
+              Write-Host "⚠️  WiX not found. Trying Inno Setup..."
+              # Try Inno Setup (is.exe)
+              if (Test-Path "is.exe") {
+                Write-Host "Using Inno Setup compiler..."
+                & .\is.exe "Installer\PhishingReporter.iss"
+                if (Test-Path "Installer\Release\PhishingReporter-Setup.exe") {
+                  Write-Host "✅ Inno Setup installer created"
+                }
+              } else {
+                Write-Host "Creating PowerShell-based installer..."
+                # Use PowerShell script to create installer
+                if (Test-Path "Installer\create_installer.ps1") {
+                  & powershell -ExecutionPolicy Bypass -File "Installer\create_installer.ps1" -OutputPath "Installer\PhishingReporter-Setup.exe"
+                  if (Test-Path "Installer\PhishingReporter-Setup.exe") {
+                    Write-Host "✅ Standalone installer created"
+                  }
                 }
               }
             }
