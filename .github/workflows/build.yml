@@ -1,0 +1,44 @@
+name: Build Phishing Reporter Plugin
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup .NET Framework
+      uses: microsoft/setup-msbuild@v1
+      
+    - name: Restore NuGet packages
+      run: nuget restore PhishingReporter.sln
+      
+    - name: Build solution (Release)
+      run: |
+        msbuild PhishingReporter.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
+      
+    - name: Check build output
+      run: |
+        if (Test-Path "PhishingReporter\bin\Release\PhishingReporter.dll") {
+          Write-Host "✅ Build successful!"
+          Get-Item "PhishingReporter\bin\Release\PhishingReporter.dll" | Select-Object Name, Length, LastWriteTime
+        } else {
+          Write-Host "❌ Build failed - DLL not found"
+          exit 1
+        }
+      
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: PhishingReporter-Release
+        path: PhishingReporter/bin/Release/
+        retention-days: 7
+

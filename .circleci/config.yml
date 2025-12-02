@@ -1,0 +1,62 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@5.0.0
+
+jobs:
+  build:
+    executor:
+      name: win/default
+      size: medium
+    
+    steps:
+      - checkout
+      
+      - run:
+          name: Restore NuGet packages
+          shell: powershell.exe
+          command: |
+            nuget restore PhishingReporter.sln
+            
+      - run:
+          name: Build solution (Release)
+          shell: powershell.exe
+          command: |
+            $msbuild = "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe"
+            if (-not (Test-Path $msbuild)) {
+              $msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
+            }
+            if (-not (Test-Path $msbuild)) {
+              $msbuild = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
+            }
+            
+            if (Test-Path $msbuild) {
+              & $msbuild PhishingReporter.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
+            } else {
+              Write-Host "MSBuild not found. Trying with msbuild command..."
+              msbuild PhishingReporter.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
+            }
+            
+      - run:
+          name: Verify build output
+          shell: powershell.exe
+          command: |
+            if (Test-Path "PhishingReporter\bin\Release\PhishingReporter.dll") {
+              Write-Host "✅ Build successful!"
+              Get-Item "PhishingReporter\bin\Release\PhishingReporter.dll" | Select-Object Name, Length, LastWriteTime
+              Get-ChildItem "PhishingReporter\bin\Release\" | Select-Object Name, Length
+            } else {
+              Write-Host "❌ Build failed - DLL not found"
+              Get-ChildItem "PhishingReporter\bin\" -Recurse -ErrorAction SilentlyContinue | Select-Object FullName
+              exit 1
+            }
+            
+      - store_artifacts:
+          path: PhishingReporter/bin/Release
+          destination: build-artifacts
+
+workflows:
+  build-workflow:
+    jobs:
+      - build
+

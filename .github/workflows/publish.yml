@@ -1,0 +1,26 @@
+name: Build ClickOnce publish
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: NuGet/setup-nuget@v2
+      - uses: microsoft/setup-msbuild@v2
+      - name: Restore
+        run: nuget restore
+      - name: Publish
+        run: |
+          msbuild .\PhishingReporter\PhishingReporter.csproj /t:Publish ^
+            /p:Configuration=Release ^
+            /p:PublishDir="$(pwd)\PhishingReporter\publish\\" ^
+            /p:PublishProtocol=ClickOnce ^
+            /p:GenerateManifests=true ^
+            /p:MapFileExtensions=true ^
+            /p:SignManifests=true ^
+            /p:ManifestKeyFile="$(pwd)\PhishingReporter\PhishingReporter_TemporaryKey.pfx"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: publish
+          path: PhishingReporter/publish

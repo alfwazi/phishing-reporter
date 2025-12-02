@@ -1,0 +1,30 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="PhishingReporter.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="infosec_email" Type="System.String" Scope="User">
+      <Value Profile="(Default)">SOC &lt;SOC@geidea.net&gt;</Value>
+    </Setting>
+    <Setting Name="gophish_url" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://10.100.125.230</Value>
+    </Setting>
+    <Setting Name="gophish_custom_header" Type="System.String" Scope="User">
+      <Value Profile="(Default)">X-GOPHISH-AJSMN</Value>
+    </Setting>
+    <Setting Name="support_email" Type="System.String" Scope="User">
+      <Value Profile="(Default)">GRC &lt;grc@geidea.net&gt;</Value>
+    </Setting>
+    <Setting Name="plugin_version" Type="System.String" Scope="User">
+      <Value Profile="(Default)">V1.1</Value>
+    </Setting>
+    <Setting Name="suspicious_reports_counter" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="gophish_reports_counter" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">0</Value>
+    </Setting>
+    <Setting Name="gophish_listener_port" Type="System.String" Scope="User">
+      <Value Profile="(Default)">3333</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
