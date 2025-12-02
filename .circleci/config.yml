@@ -110,8 +110,6 @@ jobs:
                   Get-Item "Installer\PhishingReporter-Setup.msi" | Select-Object Name, Length
                 }
               }
-            } else {
-              Write-Host "⚠️  WiX not found. Creating PowerShell-based installer..."
             }
             
             # Always create PowerShell-based installer (guaranteed to work)
