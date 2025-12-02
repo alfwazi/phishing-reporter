@@ -31,6 +31,20 @@ jobs:
             nuget restore PhishingReporter.sln
             
       - run:
+          name: Generate temporary certificate for signing (if needed)
+          shell: powershell.exe
+          command: |
+            if (-not (Test-Path "PhishingReporter\PhishingReporter_TemporaryKey.pfx")) {
+              Write-Host "Generating temporary certificate for ClickOnce signing..."
+              $cert = New-SelfSignedCertificate -Subject "CN=PhishingReporter" -CertStoreLocation Cert:\CurrentUser\My -KeyExportPolicy Exportable -KeySpec Signature -KeyLength 2048 -KeyAlgorithm RSA -HashAlgorithm SHA256 -NotAfter (Get-Date).AddYears(1)
+              $pwd = ConvertTo-SecureString -String "temp123" -Force -AsPlainText
+              Export-PfxCertificate -Cert $cert -FilePath "PhishingReporter\PhishingReporter_TemporaryKey.pfx" -Password $pwd
+              Write-Host "✅ Temporary certificate created"
+            } else {
+              Write-Host "Certificate file already exists"
+            }
+            
+      - run:
           name: Build solution and installer (Release)
           shell: powershell.exe
           command: |
