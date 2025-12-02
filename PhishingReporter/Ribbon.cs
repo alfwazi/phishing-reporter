@@ -59,7 +59,7 @@ namespace PhishingReporter
                     reportPhishingEmailToSecurityTeam(control);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 MessageBox.Show(
                     $"An error occurred: {ex.Message}\n\nPlease contact support if this persists.",
@@ -137,7 +137,7 @@ namespace PhishingReporter
             {
                 HandleError("Outlook communication error", comEx);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 HandleError("Unexpected error occurred", ex);
             }
@@ -212,7 +212,7 @@ namespace PhishingReporter
                         MessageBoxIcon.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 HandleError("Error processing GoPhish campaign", ex);
             }
@@ -298,7 +298,7 @@ namespace PhishingReporter
             {
                 HandleError("Outlook error while creating report", comEx);
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
                 HandleError("Error processing suspicious email", ex);
             }
@@ -493,7 +493,7 @@ namespace PhishingReporter
                     info.AppendLine("\n📎 HTML body not available for URL extraction");
                 }
             }
-            catch (Exception)
+            catch (System.Exception)
             {
                 info.AppendLine("\n⚠️ Error extracting URLs from email");
             }
