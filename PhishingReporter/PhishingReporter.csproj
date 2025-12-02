@@ -258,16 +258,21 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>phishing.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestKeyFile>PhishingReporter_TemporaryKey.pfx</ManifestKeyFile>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>DB814D3C81D043DA3F72248E950C99D3F8FB56FE</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <!-- Suppress certificate warning if certificate not found -->
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);MSB3327</NoWarn>
   </PropertyGroup>
   <!-- Include the build rules for a C# project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
