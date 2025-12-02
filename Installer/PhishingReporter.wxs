@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Product Id="*" 
+           Name="Phishing Reporter Outlook Add-in" 
+           Language="1033" 
+           Version="1.1.0" 
+           Manufacturer="Geidea" 
+           UpgradeCode="A5AE1C29-18E0-4E3E-A3E1-AC8EE23FF9A6">
+    
+    <Package InstallerVersion="200" 
+             Compressed="yes" 
+             InstallScope="perMachine" 
+             Description="Phishing Reporter - Outlook Add-in for reporting phishing emails"
+             Comments="Phishing Reporter Plugin for Microsoft Outlook"/>
+    
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
+    <MediaTemplate />
+    
+    <Feature Id="ProductFeature" Title="PhishingReporter" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+    
+    <UIRef Id="WixUI_Minimal" />
+    <WixVariable Id="WixUILicenseRtf" Value="LICENSE" />
+    
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+    
+    <SetDirectory Id="INSTALLFOLDER" Value="[ProgramFilesFolder]Geidea\PhishingReporter" />
+    
+  </Product>
+  
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="GeideaFolder" Name="Geidea">
+          <Directory Id="INSTALLFOLDER" Name="PhishingReporter">
+            <Directory Id="BinFolder" Name="bin">
+              <Directory Id="ReleaseFolder" Name="Release" />
+            </Directory>
+          </Directory>
+        </Directory>
+      </Directory>
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="Phishing Reporter" />
+      </Directory>
+    </Directory>
+  </Fragment>
+  
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="ReleaseFolder">
+      <Component Id="PhishingReporterDLL" Guid="B5AE1C29-18E0-4E3E-A3E1-AC8EE23FF9A6">
+        <File Id="PhishingReporterDLL" 
+              Source="..\PhishingReporter\bin\Release\PhishingReporter.dll" 
+              KeyPath="yes" />
+      </Component>
+      
+      <Component Id="PhishingReporterConfig" Guid="C5AE1C29-18E0-4E3E-A3E1-AC8EE23FF9A7">
+        <File Id="PhishingReporterConfig" 
+              Source="..\PhishingReporter\bin\Release\PhishingReporter.dll.config" 
+              KeyPath="yes" />
+      </Component>
+      
+      <Component Id="HtmlAgilityPack" Guid="D5AE1C29-18E0-4E3E-A3E1-AC8EE23FF9A8">
+        <File Id="HtmlAgilityPack" 
+              Source="..\packages\HtmlAgilityPack.1.12.2\lib\Net45\HtmlAgilityPack.dll" 
+              KeyPath="yes" />
+      </Component>
+      
+      <Component Id="ReadMe" Guid="E5AE1C29-18E0-4E3E-A3E1-AC8EE23FF9A9">
+        <File Id="ReadMe" 
+              Source="..\README.md" 
+              KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
+

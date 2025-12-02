@@ -13,6 +13,18 @@ jobs:
       - checkout
       
       - run:
+          name: Install WiX Toolset (for MSI installer)
+          shell: powershell.exe
+          command: |
+            Write-Host "Installing WiX Toolset for MSI creation..."
+            choco install wix --version 3.11.2 -y --no-progress
+            if ($LASTEXITCODE -ne 0) {
+              Write-Host "Chocolatey not available, trying direct download..."
+              # WiX will be installed via alternative method if needed
+            }
+            $env:Path += ";C:\Program Files (x86)\WiX Toolset v3.11\bin"
+            
+      - run:
           name: Restore NuGet packages
           shell: powershell.exe
           command: |
@@ -70,11 +82,43 @@ jobs:
             }
             
             Write-Host ""
-            Write-Host "Checking for installer..."
+            Write-Host "Building MSI installer with WiX..."
+            
+            # Build MSI using WiX
+            $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+            $candle = "$wixPath\candle.exe"
+            $light = "$wixPath\light.exe"
+            
+            if (Test-Path $candle) {
+              Write-Host "Compiling WiX source..."
+              & $candle Installer\PhishingReporter.wxs -out Installer\PhishingReporter.wixobj
+              
+              if ($LASTEXITCODE -eq 0) {
+                Write-Host "Linking MSI..."
+                & $light Installer\PhishingReporter.wixobj -out Installer\PhishingReporter-Setup.msi
+                
+                if (Test-Path "Installer\PhishingReporter-Setup.msi") {
+                  Write-Host "✅ MSI installer created: Installer\PhishingReporter-Setup.msi"
+                  Get-Item "Installer\PhishingReporter-Setup.msi" | Select-Object Name, Length
+                }
+              }
+            } else {
+              Write-Host "⚠️  WiX not found. Creating PowerShell-based installer..."
+              # Use PowerShell script to create installer
+              if (Test-Path "Installer\create_installer.ps1") {
+                & powershell -ExecutionPolicy Bypass -File "Installer\create_installer.ps1" -OutputPath "Installer\PhishingReporter-Setup.exe"
+                if (Test-Path "Installer\PhishingReporter-Setup.exe") {
+                  Write-Host "✅ Standalone installer created"
+                }
+              }
+            }
+            
+            # Also check for existing installers
             $installerPaths = @(
               "Installer\Release\PhishingReporter-Setup.exe",
               "Installer\Release\*.msi",
-              "Installer\Release\*.exe"
+              "Installer\Release\*.exe",
+              "Installer\PhishingReporter-Setup.msi"
             )
             
             $foundInstaller = $false
@@ -83,43 +127,7 @@ jobs:
               if ($files) {
                 Write-Host "✅ Installer found: $($files.FullName)"
                 $foundInstaller = $true
-                break
               }
-            }
-            
-            if (-not $foundInstaller) {
-              Write-Host "⚠️  Installer not found. Creating deployment package..."
-              # Create a deployment-ready package
-              $packageDir = "DeploymentPackage"
-              New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
-              Copy-Item "PhishingReporter\bin\Release\*" -Destination $packageDir -Recurse -Force
-              Copy-Item "README.md" -Destination $packageDir -Force
-              
-              # Create silent install script for SCCM
-              @"
-@echo off
-REM Phishing Reporter - Silent Installation Script for SCCM/Group Policy
-REM This script installs the Outlook add-in
-
-echo Installing Phishing Reporter Outlook Add-in...
-echo.
-
-REM Check if Outlook is installed
-reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office" /s | findstr /i "Outlook" >nul
-if errorlevel 1 (
-    echo ERROR: Microsoft Outlook not found. Please install Outlook first.
-    exit /b 1
-)
-
-REM Copy DLL to appropriate location
-REM Note: VSTO add-ins require proper registration
-REM For production deployment, use the installer or VSTO runtime
-
-echo Installation complete.
-pause
-"@ | Out-File -FilePath "$packageDir\install.bat" -Encoding ASCII
-              
-              Write-Host "✅ Deployment package created in: $packageDir"
             }
             
       - store_artifacts:
