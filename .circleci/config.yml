@@ -43,8 +43,15 @@ jobs:
             }
             
             if (Test-Path $msbuild) {
-              Write-Host "Building PhishingReporter project..."
-              & $msbuild PhishingReporter\PhishingReporter.csproj /t:Build /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
+              Write-Host "Building PhishingReporter solution..."
+              # Build the solution file to get proper output paths
+              & $msbuild PhishingReporter.sln /t:PhishingReporter:Build /p:Configuration=Release /p:Platform="Any CPU" /p:OutputPath="bin\Release\" /v:minimal
+              
+              if ($LASTEXITCODE -ne 0) {
+                Write-Host "Trying alternative build method..."
+                # Alternative: Build with explicit output path
+                & $msbuild PhishingReporter\PhishingReporter.csproj /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:OutputPath="bin\Release\" /p:BaseOutputPath="bin\" /v:minimal
+              }
               
               Write-Host "Building Installer project..."
               # Try to build installer using devenv or MSBuild
@@ -57,10 +64,11 @@ jobs:
               }
               
               if (Test-Path $devenv) {
+                Write-Host "Building installer with Visual Studio..."
                 & $devenv PhishingReporter.sln /Build Release
               } else {
                 Write-Host "⚠️  Installer project requires Visual Studio IDE. Building DLL only."
-                Write-Host "   Installer can be built manually in Visual Studio."
+                Write-Host "   Installer will be created via WiX/Inno Setup."
               }
             } else {
               Write-Host "MSBuild not found. Trying with msbuild command..."
