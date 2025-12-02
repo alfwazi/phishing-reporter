@@ -27,22 +27,39 @@ namespace PhishingReporter
 
         static GoPhishIntegration()
         {
-            // Configure TLS support
+            // Configure TLS support - flexible for internal networks
+            // Supports both HTTP (internal) and HTTPS (external) connections
             try
             {
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+                // Try to enable TLS 1.2/1.3 for HTTPS connections
+                // But allow HTTP connections for internal networks without TLS
+                ServicePointManager.SecurityProtocol = 
+                    SecurityProtocolType.Tls12 | 
+                    SecurityProtocolType.Tls13 | 
+                    SecurityProtocolType.Ssl3 | 
+                    SecurityProtocolType.Tls;
             }
             catch
             {
-                // Fallback to TLS 1.2 only if 1.3 not available
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                // Fallback: Allow all protocols including HTTP for internal networks
+                try
+                {
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls;
+                }
+                catch
+                {
+                    // If TLS configuration fails, continue without forcing TLS
+                    // This allows HTTP connections in internal networks
+                }
             }
 
-            // Initialize HttpClient with modern TLS support
+            // Initialize HttpClient - supports both HTTP and HTTPS
             var handler = new HttpClientHandler
             {
                 AllowAutoRedirect = true,
-                MaxAutomaticRedirections = 3
+                MaxAutomaticRedirections = 3,
+                // Don't validate SSL certificates for internal networks
+                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
             };
             
             httpClient = new HttpClient(handler)
@@ -87,7 +104,7 @@ namespace PhishingReporter
                     }
                 }
             }
-            catch (Exception)
+            catch (System.Exception)
             {
                 // Log error silently, return null to indicate failure
             }
@@ -127,7 +144,7 @@ namespace PhishingReporter
             {
                 // Timeout occurred
             }
-            catch (Exception)
+            catch (System.Exception)
             {
                 // Other errors
             }
