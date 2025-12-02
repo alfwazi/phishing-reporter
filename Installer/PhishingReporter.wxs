@@ -67,9 +67,15 @@
               KeyPath="yes" />
       </Component>
       
-      <Component Id="ReadMe" Guid="E5AE1C29-18E0-4E3E-A3E1-AC8EE23FF9A9">
-        <File Id="ReadMe" 
-              Source="..\README.md" 
+      <Component Id="PhishingReporterVSTO" Guid="F5AE1C29-18E0-4E3E-A3E1-AC8EE23FF9AA">
+        <File Id="PhishingReporterVSTO" 
+              Source="..\PhishingReporter\bin\Release\PhishingReporter.vsto" 
+              KeyPath="yes" />
+      </Component>
+      
+      <Component Id="PhishingReporterManifest" Guid="15AE1C29-18E0-4E3E-A3E1-AC8EE23FF9AB">
+        <File Id="PhishingReporterManifest" 
+              Source="..\PhishingReporter\bin\Release\PhishingReporter.dll.manifest" 
               KeyPath="yes" />
       </Component>
     </ComponentGroup>

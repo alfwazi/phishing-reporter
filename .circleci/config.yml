@@ -92,24 +92,39 @@ jobs:
             Write-Host ""
             Write-Host "Building MSI installer with WiX..."
             
-            # Build MSI using WiX
+            # Build MSI using WiX Toolset 3.11.2
             $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
             $candle = "$wixPath\candle.exe"
             $light = "$wixPath\light.exe"
             
             if (Test-Path $candle) {
-              Write-Host "Compiling WiX source..."
+              Write-Host "Compiling WiX source file..."
+              Write-Host "  Input: Installer\PhishingReporter.wxs"
+              Write-Host "  Output: Installer\PhishingReporter.wixobj"
+              
               & $candle Installer\PhishingReporter.wxs -out Installer\PhishingReporter.wixobj
               
               if ($LASTEXITCODE -eq 0) {
-                Write-Host "Linking MSI..."
+                Write-Host "Linking MSI installer..."
+                Write-Host "  Input: Installer\PhishingReporter.wixobj"
+                Write-Host "  Output: Installer\PhishingReporter-Setup.msi"
+                
                 & $light Installer\PhishingReporter.wixobj -out Installer\PhishingReporter-Setup.msi
                 
                 if (Test-Path "Installer\PhishingReporter-Setup.msi") {
-                  Write-Host "✅ MSI installer created: Installer\PhishingReporter-Setup.msi"
-                  Get-Item "Installer\PhishingReporter-Setup.msi" | Select-Object Name, Length
+                  Write-Host "✅ MSI installer created successfully!"
+                  $msiFile = Get-Item "Installer\PhishingReporter-Setup.msi"
+                  Write-Host "   File: $($msiFile.FullName)"
+                  Write-Host "   Size: $([math]::Round($msiFile.Length / 1KB, 2)) KB"
+                  $msiFile | Select-Object Name, Length, LastWriteTime
+                } else {
+                  Write-Host "⚠️  MSI file not found after linking"
                 }
+              } else {
+                Write-Host "⚠️  WiX compilation failed (exit code: $LASTEXITCODE)"
               }
+            } else {
+              Write-Host "⚠️  WiX Toolset not found at: $wixPath"
             }
             
             # Always create PowerShell-based installer (guaranteed to work)
