@@ -307,7 +307,7 @@ namespace PhishingReporter
         /// <summary>
         /// Handles errors by showing message and sending error report
         /// </summary>
-        private void HandleError(string context, Exception ex)
+        private void HandleError(string context, System.Exception ex)
         {
             try
             {
