@@ -110,10 +110,11 @@ jobs:
                   Get-Item "Installer\PhishingReporter-Setup.msi" | Select-Object Name, Length
                 }
               }
-            } else {
-              Write-Host "⚠️  WiX not found. Trying Inno Setup..."
-              # Create PowerShell-based installer (guaranteed to work)
-              Write-Host "Creating PowerShell-based installer..."
+            }
+            
+            # Always create PowerShell-based installer (guaranteed to work)
+            Write-Host ""
+            Write-Host "Creating PowerShell-based installer..."
               $installerDir = "Installer\Release"
               New-Item -ItemType Directory -Force -Path $installerDir | Out-Null
               
@@ -193,10 +194,6 @@ jobs:
                 }
               }
             }
-            
-            # Always create PowerShell-based installer (guaranteed to work)
-            Write-Host ""
-            Write-Host "Creating PowerShell-based installer..."
             
             # Verify installer was created
             if (Test-Path "Installer\PhishingReporter-Setup.zip") {
