@@ -161,90 +161,68 @@ jobs:
             }
             
             # Create SCCM installation script
-            $installScript = @'
-@echo off
-REM Phishing Reporter - SCCM Deployment Script
-REM Silent installation for enterprise deployment
-
-setlocal
-set INSTALL_DIR=%ProgramFiles%\PhishingReporter
-set OUTLOOK_VERSION=
-
-REM Detect Outlook version
-for /f "tokens=*" %%i in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Office" /s /f "Outlook" 2^>nul ^| findstr /i "Version"') do (
-    set OUTLOOK_VERSION=%%i
-)
-
-if "%OUTLOOK_VERSION%"=="" (
-    echo ERROR: Microsoft Outlook not detected
-    exit /b 1
-)
-
-REM Create installation directory
-if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
-
-REM Copy files
-xcopy /Y /I "%~dp0Files\*" "%INSTALL_DIR%\"
-
-REM Register add-in (VSTO specific)
-REM Note: May require VSTO runtime and proper registration
-
-echo Phishing Reporter installed successfully
-exit /b 0
-'@
+            $installScript = "echo off`n"
+            $installScript += "REM Phishing Reporter - SCCM Deployment Script`n"
+            $installScript += "REM Silent installation for enterprise deployment`n`n"
+            $installScript += "setlocal`n"
+            $installScript += "set INSTALL_DIR=%ProgramFiles%\\PhishingReporter`n"
+            $installScript += "set OUTLOOK_VERSION=`n`n"
+            $installScript += "REM Detect Outlook version`n"
+            $installScript += "for /f `"tokens=*`" %%%%i in ('reg query `"HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Office`" /s /f `"Outlook`" 2^>nul ^| findstr /i `"Version`"') do (`n"
+            $installScript += "    set OUTLOOK_VERSION=%%%%i`n"
+            $installScript += ")`n`n"
+            $installScript += "if `"%OUTLOOK_VERSION%`"==`"`" (`n"
+            $installScript += "    echo ERROR: Microsoft Outlook not detected`n"
+            $installScript += "    exit /b 1`n"
+            $installScript += ")`n`n"
+            $installScript += "REM Create installation directory`n"
+            $installScript += "if not exist `"%INSTALL_DIR%`" mkdir `"%INSTALL_DIR%`"`n`n"
+            $installScript += "REM Copy files`n"
+            $installScript += "xcopy /Y /I `"%~dp0Files\\*`" `"%INSTALL_DIR%\\`"`n`n"
+            $installScript += "REM Register add-in (VSTO specific)`n"
+            $installScript += "REM Note: May require VSTO runtime and proper registration`n`n"
+            $installScript += "echo Phishing Reporter installed successfully`n"
+            $installScript += "exit /b 0`n"
             $installScript | Out-File -FilePath "$packageDir\install.cmd" -Encoding ASCII
             
             # Create uninstall script
-            $uninstallScript = @'
-@echo off
-REM Phishing Reporter - Uninstall Script for SCCM
-
-set INSTALL_DIR=%ProgramFiles%\PhishingReporter
-
-if exist "%INSTALL_DIR%" (
-    rmdir /S /Q "%INSTALL_DIR%"
-    echo Phishing Reporter uninstalled
-) else (
-    echo Phishing Reporter not found
-)
-
-exit /b 0
-'@
+            $uninstallScript = "echo off`n"
+            $uninstallScript += "REM Phishing Reporter - Uninstall Script for SCCM`n`n"
+            $uninstallScript += "set INSTALL_DIR=%ProgramFiles%\\PhishingReporter`n`n"
+            $uninstallScript += "if exist `"%INSTALL_DIR%`" (`n"
+            $uninstallScript += "    rmdir /S /Q `"%INSTALL_DIR%`"`n"
+            $uninstallScript += "    echo Phishing Reporter uninstalled`n"
+            $uninstallScript += ") else (`n"
+            $uninstallScript += "    echo Phishing Reporter not found`n"
+            $uninstallScript += ")`n`n"
+            $uninstallScript += "exit /b 0`n"
             $uninstallScript | Out-File -FilePath "$packageDir\uninstall.cmd" -Encoding ASCII
             
             # Create deployment instructions
-            $readmeText = @'
-SCCM / Group Policy Deployment Instructions
-===========================================
-
-1. Package Contents:
-   - Files\ : All DLL and dependencies
-   - install.cmd : Silent installation script
-   - uninstall.cmd : Uninstallation script
-
-2. SCCM Deployment:
-   - Create new Application in SCCM
-   - Set install command: install.cmd
-   - Set uninstall command: uninstall.cmd
-   - Detection method: Check for %ProgramFiles%\PhishingReporter\PhishingReporter.dll
-
-3. Group Policy Deployment:
-   - Copy package to network share
-   - Create GPO with startup script pointing to install.cmd
-   - Or use Software Installation policy
-
-4. Requirements:
-   - Microsoft Outlook (2013 or later)
-   - .NET Framework 4.6.1 or later
-   - VSTO Runtime (usually pre-installed with Office)
-
-5. Silent Installation:
-   install.cmd
-
-6. Verification:
-   Check Outlook Add-ins: File > Options > Add-ins
-   Look for "Phishing Reporter" in Active Application Add-ins
-'@
+            $readmeText = "SCCM / Group Policy Deployment Instructions`n"
+            $readmeText += "===========================================`n`n"
+            $readmeText += "1. Package Contents:`n"
+            $readmeText += "   - Files\\ : All DLL and dependencies`n"
+            $readmeText += "   - install.cmd : Silent installation script`n"
+            $readmeText += "   - uninstall.cmd : Uninstallation script`n`n"
+            $readmeText += "2. SCCM Deployment:`n"
+            $readmeText += "   - Create new Application in SCCM`n"
+            $readmeText += "   - Set install command: install.cmd`n"
+            $readmeText += "   - Set uninstall command: uninstall.cmd`n"
+            $readmeText += "   - Detection method: Check for %ProgramFiles%\\PhishingReporter\\PhishingReporter.dll`n`n"
+            $readmeText += "3. Group Policy Deployment:`n"
+            $readmeText += "   - Copy package to network share`n"
+            $readmeText += "   - Create GPO with startup script pointing to install.cmd`n"
+            $readmeText += "   - Or use Software Installation policy`n`n"
+            $readmeText += "4. Requirements:`n"
+            $readmeText += "   - Microsoft Outlook (2013 or later)`n"
+            $readmeText += "   - .NET Framework 4.6.1 or later`n"
+            $readmeText += "   - VSTO Runtime (usually pre-installed with Office)`n`n"
+            $readmeText += "5. Silent Installation:`n"
+            $readmeText += "   install.cmd`n`n"
+            $readmeText += "6. Verification:`n"
+            $readmeText += "   Check Outlook Add-ins: File > Options > Add-ins`n"
+            $readmeText += "   Look for `"Phishing Reporter`" in Active Application Add-ins`n"
             $readmeText | Out-File -FilePath "$packageDir\DEPLOYMENT_README.txt" -Encoding ASCII
             
             Write-Host "✅ SCCM deployment package created in: $packageDir"
