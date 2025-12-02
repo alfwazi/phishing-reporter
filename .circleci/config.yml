@@ -44,35 +44,21 @@ jobs:
             
             if (Test-Path $msbuild) {
               Write-Host "Building PhishingReporter solution..."
-              # Build the solution file to get proper output paths
-              & $msbuild PhishingReporter.sln /t:PhishingReporter:Build /p:Configuration=Release /p:Platform="Any CPU" /p:OutputPath="bin\Release\" /v:minimal
+              # Build the solution file - this sets all output paths correctly
+              & $msbuild PhishingReporter.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /v:minimal /m
               
               if ($LASTEXITCODE -ne 0) {
-                Write-Host "Trying alternative build method..."
-                # Alternative: Build with explicit output path
-                & $msbuild PhishingReporter\PhishingReporter.csproj /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:OutputPath="bin\Release\" /p:BaseOutputPath="bin\" /v:minimal
+                Write-Host "Build failed, checking for errors..."
+                exit 1
               }
               
-              Write-Host "Building Installer project..."
-              # Try to build installer using devenv or MSBuild
-              $devenv = "C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.com"
-              if (-not (Test-Path $devenv)) {
-                $devenv = "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.com"
-              }
-              if (-not (Test-Path $devenv)) {
-                $devenv = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\devenv.com"
-              }
-              
-              if (Test-Path $devenv) {
-                Write-Host "Building installer with Visual Studio..."
-                & $devenv PhishingReporter.sln /Build Release
-              } else {
-                Write-Host "⚠️  Installer project requires Visual Studio IDE. Building DLL only."
-                Write-Host "   Installer will be created via WiX/Inno Setup."
-              }
+              Write-Host "✅ Solution built successfully"
             } else {
               Write-Host "MSBuild not found. Trying with msbuild command..."
-              msbuild PhishingReporter.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /v:minimal
+              msbuild PhishingReporter.sln /t:Build /p:Configuration=Release /p:Platform="Any CPU" /v:minimal /m
+              if ($LASTEXITCODE -ne 0) {
+                exit 1
+              }
             }
             
       - run:
