@@ -27,24 +27,22 @@ namespace PhishingReporter
 
         static GoPhishIntegration()
         {
-            // Configure TLS support - flexible for internal networks
+            // Configure TLS support - flexible for internal networks (.NET Framework 4.6.1 compatible)
             // Supports both HTTP (internal) and HTTPS (external) connections
             try
             {
-                // Try to enable TLS 1.2/1.3 for HTTPS connections
-                // But allow HTTP connections for internal networks without TLS
+                // Enable TLS 1.2 and TLS 1.0 for HTTPS connections
+                // Note: TLS 1.3 is not available in .NET Framework 4.6.1
                 ServicePointManager.SecurityProtocol = 
                     SecurityProtocolType.Tls12 | 
-                    SecurityProtocolType.Tls13 | 
-                    SecurityProtocolType.Ssl3 | 
                     SecurityProtocolType.Tls;
             }
             catch
             {
-                // Fallback: Allow all protocols including HTTP for internal networks
+                // Fallback: Allow TLS 1.2 only
                 try
                 {
-                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls;
+                    ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 }
                 catch
                 {
@@ -53,13 +51,16 @@ namespace PhishingReporter
                 }
             }
 
+            // Disable SSL certificate validation for internal networks
+            // This allows connections to internal servers with self-signed certificates
+            ServicePointManager.ServerCertificateValidationCallback = 
+                (sender, certificate, chain, sslPolicyErrors) => true;
+
             // Initialize HttpClient - supports both HTTP and HTTPS
             var handler = new HttpClientHandler
             {
                 AllowAutoRedirect = true,
-                MaxAutomaticRedirections = 3,
-                // Don't validate SSL certificates for internal networks
-                ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true
+                MaxAutomaticRedirections = 3
             };
             
             httpClient = new HttpClient(handler)
