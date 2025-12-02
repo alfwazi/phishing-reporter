@@ -143,6 +143,19 @@ jobs:
           destination: installer-artifacts
           
       - run:
+          name: Copy MSI installer to artifacts if created
+          shell: powershell.exe
+          command: |
+            if (Test-Path "Installer\PhishingReporter-Setup.msi") {
+              Write-Host "✅ MSI installer found, copying to Release folder for artifacts..."
+              Copy-Item "Installer\PhishingReporter-Setup.msi" -Destination "Installer\Release\" -Force -ErrorAction SilentlyContinue
+            }
+            if (Test-Path "Installer\PhishingReporter-Setup.exe") {
+              Write-Host "✅ EXE installer found, copying to Release folder for artifacts..."
+              Copy-Item "Installer\PhishingReporter-Setup.exe" -Destination "Installer\Release\" -Force -ErrorAction SilentlyContinue
+            }
+          
+      - run:
           name: Create SCCM deployment package
           shell: powershell.exe
           command: |
