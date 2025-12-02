@@ -122,8 +122,8 @@ jobs:
                   $issPath = "PhishingReporter.iss"
                   Write-Host "Running from Installer directory: $isPath /cc $issPath"
                   
-                  # Run Inno Setup with /O+ to overwrite output, /Q for quiet mode
-                  $process = Start-Process -FilePath $isPath -ArgumentList "/cc", "/O+", "/Q", $issPath -Wait -PassThru -NoNewWindow
+                  # Run Inno Setup with /O+ to overwrite output, /Q for quiet mode, /SILENT for no prompts
+                  $process = Start-Process -FilePath $isPath -ArgumentList "/cc", "/O+", "/Q", "/SILENT", $issPath -Wait -PassThru -NoNewWindow
                   Write-Host "Inno Setup exit code: $($process.ExitCode)"
                 } finally {
                   Pop-Location
