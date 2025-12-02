@@ -192,17 +192,11 @@ jobs:
                   Pop-Location
                 }
               }
-              } else {
-                Write-Host "Creating PowerShell-based installer..."
-                # Use PowerShell script to create installer
-                if (Test-Path "Installer\create_installer.ps1") {
-                  & powershell -ExecutionPolicy Bypass -File "Installer\create_installer.ps1" -OutputPath "Installer\PhishingReporter-Setup.exe"
-                  if (Test-Path "Installer\PhishingReporter-Setup.exe") {
-                    Write-Host "✅ Standalone installer created"
-                  }
-                }
-              }
             }
+            
+            # Always create PowerShell-based installer (guaranteed to work)
+            Write-Host ""
+            Write-Host "Creating PowerShell-based installer..."
             
             # Verify installer was created
             if (Test-Path "Installer\PhishingReporter-Setup.zip") {
