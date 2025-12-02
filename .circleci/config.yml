@@ -161,7 +161,7 @@ jobs:
             }
             
             # Create SCCM installation script
-            @"
+            $installScript = @'
 @echo off
 REM Phishing Reporter - SCCM Deployment Script
 REM Silent installation for enterprise deployment
@@ -191,10 +191,11 @@ REM Note: May require VSTO runtime and proper registration
 
 echo Phishing Reporter installed successfully
 exit /b 0
-"@ | Out-File -FilePath "$packageDir\install.cmd" -Encoding ASCII
+'@
+            $installScript | Out-File -FilePath "$packageDir\install.cmd" -Encoding ASCII
             
             # Create uninstall script
-            @"
+            $uninstallScript = @'
 @echo off
 REM Phishing Reporter - Uninstall Script for SCCM
 
@@ -208,10 +209,11 @@ if exist "%INSTALL_DIR%" (
 )
 
 exit /b 0
-"@ | Out-File -FilePath "$packageDir\uninstall.cmd" -Encoding ASCII
+'@
+            $uninstallScript | Out-File -FilePath "$packageDir\uninstall.cmd" -Encoding ASCII
             
             # Create deployment instructions
-            @"
+            $readmeText = @'
 SCCM / Group Policy Deployment Instructions
 ===========================================
 
@@ -242,7 +244,8 @@ SCCM / Group Policy Deployment Instructions
 6. Verification:
    Check Outlook Add-ins: File > Options > Add-ins
    Look for "Phishing Reporter" in Active Application Add-ins
-"@ | Out-File -FilePath "$packageDir\DEPLOYMENT_README.txt" -Encoding ASCII
+'@
+            $readmeText | Out-File -FilePath "$packageDir\DEPLOYMENT_README.txt" -Encoding ASCII
             
             Write-Host "✅ SCCM deployment package created in: $packageDir"
             Get-ChildItem $packageDir -Recurse | Select-Object FullName
