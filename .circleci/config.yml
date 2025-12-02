@@ -110,13 +110,15 @@ jobs:
                   Get-Item "Installer\PhishingReporter-Setup.msi" | Select-Object Name, Length
                 }
               }
+            } else {
+              Write-Host "⚠️  WiX not found. Creating PowerShell-based installer..."
             }
             
             # Always create PowerShell-based installer (guaranteed to work)
             Write-Host ""
             Write-Host "Creating PowerShell-based installer..."
-              $installerDir = "Installer\Release"
-              New-Item -ItemType Directory -Force -Path $installerDir | Out-Null
+            $installerDir = "Installer\Release"
+            New-Item -ItemType Directory -Force -Path $installerDir | Out-Null
               
               # Create self-extracting installer script
               $installerScript = "echo off`n"
@@ -156,42 +158,41 @@ jobs:
               $installerScript += "echo Installation complete!`n"
               $installerScript += "pause`n"
               
-              # Create Files subdirectory and copy DLLs
-              $filesDir = Join-Path $installerDir "Files"
-              New-Item -ItemType Directory -Force -Path $filesDir | Out-Null
-              Copy-Item -Path "PhishingReporter\bin\Release\*" -Destination $filesDir -Recurse -Force
-              
-              # Save installer script
-              $installerScript | Out-File -FilePath (Join-Path $installerDir "install.cmd") -Encoding ASCII
-              
-              # Create a simple batch file that can be renamed to .exe if needed
-              # For now, create a ZIP file that can be extracted and run
-              $zipFile = Join-Path "Installer" "PhishingReporter-Setup.zip"
-              Compress-Archive -Path "$installerDir\*" -DestinationPath $zipFile -Force
-              
-              Write-Host "✅ PowerShell-based installer created:"
-              Write-Host "   - Installer package: $zipFile"
-              Write-Host "   - Installation script: $installerDir\install.cmd"
-              Get-Item $zipFile | Select-Object Name, Length
-              
-              # Also try Inno Setup if available (optional)
-              if (Test-Path "is.exe") {
-                Write-Host ""
-                Write-Host "Attempting Inno Setup (optional)..."
-                Push-Location "Installer"
-                try {
-                  $isPath = Resolve-Path "..\is.exe"
-                  $issPath = "PhishingReporter.iss"
-                  $process = Start-Process -FilePath $isPath -ArgumentList "/cc", "/O+", "/Q", "/SILENT", $issPath -Wait -PassThru -NoNewWindow
-                  if ($process.ExitCode -eq 0 -and (Test-Path "Release\PhishingReporter-Setup.exe")) {
-                    Copy-Item "Release\PhishingReporter-Setup.exe" -Destination "..\Installer\Release\" -Force -ErrorAction SilentlyContinue
-                    Write-Host "✅ Inno Setup installer also created"
-                  }
-                } catch {
-                  Write-Host "⚠️  Inno Setup failed (non-critical)"
-                } finally {
-                  Pop-Location
+            # Create Files subdirectory and copy DLLs
+            $filesDir = Join-Path $installerDir "Files"
+            New-Item -ItemType Directory -Force -Path $filesDir | Out-Null
+            Copy-Item -Path "PhishingReporter\bin\Release\*" -Destination $filesDir -Recurse -Force
+            
+            # Save installer script
+            $installerScript | Out-File -FilePath (Join-Path $installerDir "install.cmd") -Encoding ASCII
+            
+            # Create a simple batch file that can be renamed to .exe if needed
+            # For now, create a ZIP file that can be extracted and run
+            $zipFile = Join-Path "Installer" "PhishingReporter-Setup.zip"
+            Compress-Archive -Path "$installerDir\*" -DestinationPath $zipFile -Force
+            
+            Write-Host "✅ PowerShell-based installer created:"
+            Write-Host "   - Installer package: $zipFile"
+            Write-Host "   - Installation script: $installerDir\install.cmd"
+            Get-Item $zipFile | Select-Object Name, Length
+            
+            # Also try Inno Setup if available (optional)
+            if (Test-Path "is.exe") {
+              Write-Host ""
+              Write-Host "Attempting Inno Setup (optional)..."
+              Push-Location "Installer"
+              try {
+                $isPath = Resolve-Path "..\is.exe"
+                $issPath = "PhishingReporter.iss"
+                $process = Start-Process -FilePath $isPath -ArgumentList "/cc", "/O+", "/Q", "/SILENT", $issPath -Wait -PassThru -NoNewWindow
+                if ($process.ExitCode -eq 0 -and (Test-Path "Release\PhishingReporter-Setup.exe")) {
+                  Copy-Item "Release\PhishingReporter-Setup.exe" -Destination "..\Installer\Release\" -Force -ErrorAction SilentlyContinue
+                  Write-Host "✅ Inno Setup installer also created"
                 }
+              } catch {
+                Write-Host "⚠️  Inno Setup failed (non-critical)"
+              } finally {
+                Pop-Location
               }
             }
             
